@@ -8,7 +8,9 @@ import android.util.Log
 import android.widget.SeekBar
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.async
 import org.jetbrains.anko.toast
+import org.jetbrains.anko.uiThread
 
 
 /**
@@ -62,8 +64,6 @@ class MainActivity : AppCompatActivity() {
         })
 
 
-
-
         //Advanced listeners
 
 
@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         customToneDurationInput.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
 
-                customToneDuration = progress*50 +200
+                customToneDuration = progress*50+ 50
                 customToneDurationTitle.text = "Duration ${customToneDuration} ms"
 
             }
@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
         customToneToneInput.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
 
-                customToneTone = progress*50 +200
+                customToneTone = progress*50 + 50
                 customToneToneTitle.text = "Tone ${customToneTone} Hz"
 
             }
@@ -158,12 +158,22 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun saveCustomHashTone(){
-        if(editTextNewHashToneName.text.toString().isEmpty()){
-            this.toast("Can't save tone with empty name") //Actually this can be done, just don't see it
-            return
+
+        async {
+            if(editTextNewHashToneName.text.toString().isEmpty()){
+                uiThread {
+                    toast("Can't save tone with empty name") //Actually this can be done, just don't see it reasonable
+                }
+
+            } else {
+                TonePlayer.constructHashArray(editTextNewHashToneName.text.toString(), createHashToneTone, createHashToneDuration)
+
+            }
+
+
+
         }
 
-        TonePlayer.constructHashArray(editTextNewHashToneName.text.toString(), createHashToneTone, createHashToneDuration)
     }
 
 
@@ -180,35 +190,49 @@ class MainActivity : AppCompatActivity() {
 
     private fun playHashTone(){
 
-        if (TonePlayer.doesHashExist(PlayHashToneNameInput.text.toString())){
-            var hashName = PlayHashToneNameInput.text.toString()
+        async {
+            if (TonePlayer.doesHashExist(PlayHashToneNameInput.text.toString())){
+                val hashName = PlayHashToneNameInput.text.toString()
 
-            TonePlayer.playHashArray(hashName)
+                TonePlayer.playHashArray(hashName)
+
+            }
 
         }
+
 
     }
 
 
     private fun playCustomTone(){
-        TonePlayer.playHzForMs(customToneTone,customToneDuration)
+
+        async {
+            TonePlayer.playHzForMs(customToneTone,customToneDuration)
+
+        }
+
 
     }
 
 
     private fun playLong(){
 
-        //Play 400Hz for 1.5 seconds
-        TonePlayer.playHzForMs(400, 1500)
+        async {
+            //Play 400Hz for 1.5 seconds
+            TonePlayer.playHzForMs(400, 1500)
+
+        }
+
 
 
     }
 
     private fun playShort(){
 
-        //Play 400Hz for 500ms
-        TonePlayer.playHzForMs(400, 500)
-
+        async {
+            //Play 400Hz for 500ms
+            TonePlayer.playHzForMs(400, 500)
+        }
 
 
 
